@@ -1,0 +1,191 @@
+#include "stdio.h"
+#include "stdlib.h"
+#include "time.h"
+#include "Windows.h"
+#define n 10000
+
+// 冒泡排序
+double bubbleSort(int number, int data[]) {
+    for (int i = 0; i < number; ++i) {
+        for (int j = 0; j < number - i - 1; ++j) {
+            if (data[j] >= data[j + 1]) {
+                int temp = data[j];
+                data[j] = data[j + 1];
+                data[j + 1] = temp;
+            }
+        }
+    }
+    return 0;
+}
+
+// 插入排序
+double insertSort(int number, int data[]) {
+    for (int i = 1; i < number; ++i) {
+        for (int j = i; j > 0; j--) {
+            if (data[j] < data[j - 1]) {
+                int temp = data[j];
+                data[j] = data[j - 1];
+                data[j - 1] = temp;
+            }
+            else {
+                break;
+            }
+        }
+    }
+    return 0;
+}
+
+// 选择排序
+double selectSort(int number, int data[]) {
+    for (int i = 0; i < number - 1; i++) {
+        for (int j = i + 1; j < number; j++) {
+            if (data[i] > data[j]) {
+                int temp = data[i];
+                data[i] = data[j];
+                data[j] = temp;
+            }
+        }
+    }
+    return 0;
+}
+
+// 快速排序
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int divide(int data[], int low, int high) {
+    int middle = data[high];
+    int i = low - 1;
+
+    for (int j = low; j < high; j++) {
+        if (data[j] < middle) {
+            i++;
+            swap(&data[i], &data[j]);
+        }
+    }
+
+    swap(&data[i + 1], &data[high]);
+    return i + 1;
+}
+
+void quickSort(int data[], int low, int high) {
+    if (low < high) {
+        int pi = divide(data, low, high);
+        quickSort(data, low, pi - 1);
+        quickSort(data, pi + 1, high);
+    }
+}
+
+// 归并排序
+void merge(int* data1, int* data2, int* result, int length1, int length2) {
+    int point1 = 0;
+    int point2 = 0;
+    int resultPoint = 0;
+    while (!(point1 == length1 && point2 == length2)) {
+        if (point1 == length1) {
+            result[resultPoint] = data2[point2];
+            point2++, resultPoint++;
+            continue;
+        }
+        if (point2 == length2) {
+            result[resultPoint] = data1[point1];
+            point1++, resultPoint++;
+            continue;
+        }
+        if (data1[point1] < data2[point2]) {
+            result[resultPoint] = data1[point1];
+            point1++, resultPoint++;
+        }
+        else {
+            result[resultPoint] = data2[point2];
+            point2++, resultPoint++;
+        }
+    }
+}
+
+void mergeSort(int* data, int* re, int startIndex, int endIndex) {
+    if (startIndex == endIndex) {
+        re[0] = data[startIndex];
+        return;
+    }
+    int middle = (startIndex + endIndex) / 2;
+    int* in1 = (int*)malloc((middle - startIndex + 1) * sizeof(int));
+    mergeSort(data, in1, startIndex, middle);
+    int* in2 = (int*)malloc((endIndex - middle) * sizeof(int));
+    mergeSort(data, in2, middle + 1, endIndex);
+    merge(in1, in2, re, middle - startIndex + 1, endIndex - middle);
+}
+
+int main() {
+    int data[n];
+    int origin[n];
+    srand((unsigned int)(time(NULL)));
+    for (int i = 0; i < n; ++i) {
+        data[i] = rand();
+    }
+    for (int i = 0; i < n; i++) {
+        origin[i] = data[i];
+    }
+
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER bubblestart, bubbleend;
+    double elapsedTime1;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&bubblestart);
+    bubbleSort(n, data);
+    QueryPerformanceCounter(&bubbleend);
+    elapsedTime1 = (double)(bubbleend.QuadPart - bubblestart.QuadPart) / frequency.QuadPart;
+    printf("bubblesort: %lf 秒\n", elapsedTime1);
+    for (int i = 0; i < n; i++) {
+        data[i] = origin[i];
+    }
+
+    LARGE_INTEGER insertstart, insertend;
+    double elapsedTime2;
+    QueryPerformanceCounter(&insertstart);
+    insertSort(n, data);
+    QueryPerformanceCounter(&insertend);
+    elapsedTime2 = (double)(insertend.QuadPart - insertstart.QuadPart) / frequency.QuadPart;
+    printf("insertsort: %lf 秒\n", elapsedTime2);
+    for (int i = 0; i < n; i++) {
+        data[i] = origin[i];
+    }
+
+    LARGE_INTEGER selectstart, selectend;
+    double elapsedTime3;
+    QueryPerformanceCounter(&selectstart);
+    selectSort(n, data);
+    QueryPerformanceCounter(&selectend);
+    elapsedTime3 = (double)(selectend.QuadPart - selectstart.QuadPart) / frequency.QuadPart;
+    printf("selectsort: %lf 秒\n", elapsedTime3);
+    for (int i = 0; i < n; i++) {
+        data[i] = origin[i];
+    }
+
+    LARGE_INTEGER quickstart, quickend;
+    double elapsedTime4;
+    QueryPerformanceCounter(&quickstart);
+    quickSort(data, 0, n - 1);
+    QueryPerformanceCounter(&quickend);
+    elapsedTime4 = (double)(quickend.QuadPart - quickstart.QuadPart) / frequency.QuadPart;
+    printf("quicksort: %lf 秒\n", elapsedTime4);
+    for (int i = 0; i < n; i++) {
+        data[i] = origin[i];
+    }
+
+    int fina[n];
+    LARGE_INTEGER mergestart, mergeend;
+    double elapsedTime5;
+    QueryPerformanceCounter(&mergestart);
+    mergeSort(data, fina, 0, n - 1);
+    QueryPerformanceCounter(&mergeend);
+    elapsedTime5 = (double)(mergeend.QuadPart - mergestart.QuadPart) / frequency.QuadPart;
+    printf("mergesort: %lf 秒\n", elapsedTime5);
+    for (int i = 0; i < n; i++) {
+        data[i] = fina[i];
+    }
+}
+
