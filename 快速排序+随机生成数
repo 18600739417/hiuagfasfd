@@ -1,0 +1,91 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+#include<Windows.h> // 引入Windows.h以使用高精度计时器
+
+#define MaxLength 10
+
+void quickSort(int arr[], int low, int high);
+int divide(int arr[], int low, int high);
+void swap(int* a, int* b);
+void InputData(int &flag, int a[]);
+
+int main()
+{
+    int flag = 0;
+    int data[MaxLength];
+    InputData(flag, data);
+    //printf("排序前数据：");
+   // for (int i = 0; i < flag; i++)
+   // {
+    //    printf("%6d", data[i]);
+    //}
+    //printf("\n");
+
+    LARGE_INTEGER frequency; // 用于存储计时器的频率
+    LARGE_INTEGER start, end; // 用于存储计时器的开始和结束时间
+    double elapsedTime; // 用于存储排序所用的时间
+
+    // 获取计时器频率
+    QueryPerformanceFrequency(&frequency);
+
+    // 开始计时
+    QueryPerformanceCounter(&start);
+
+    // 调用快速排序
+    quickSort(data, 0, flag - 1);
+
+    // 结束计时
+    QueryPerformanceCounter(&end);
+
+    // 计算排序所用的时间
+    elapsedTime = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
+    printf("QuickSort Time: %lf 秒\n", elapsedTime);
+
+    //printf("排序后数据：");
+    //for (int i = 0; i < flag; i++)
+    //{
+    //    printf("%6d", data[i]);
+    //}
+    //printf("\n");
+
+    return 0;
+}
+
+void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        int pi = divide(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+int divide(int arr[], int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+
+    for (int j = low; j < high; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+
+    swap(&arr[i + 1], &arr[high]);
+    return i + 1;
+}
+
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void InputData(int &flag, int a[])
+{
+    srand((unsigned int)time(NULL)); // 设置随机数种子
+    flag = MaxLength; // 设置数组长度
+    for (int i = 0; i < flag; i++) {
+        a[i] = rand(); // 生成随机数
+    }
+}
